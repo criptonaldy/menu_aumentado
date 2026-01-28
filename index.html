@@ -1,295 +1,57 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
     
     <style>
-        /* COMPLETAMENTE INVISIBLE - SOLO CAMARA */
-        html, body {
-            margin: 0;
-            padding: 0;
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
-            background: transparent !important;
-            position: fixed;
-            top: 0;
-            left: 0;
-            touch-action: none;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            user-select: none;
-        }
-        
-        /* MODELO TRANSPARENTE */
-        model-viewer {
-            width: 100%;
-            height: 100%;
-            --poster-color: transparent;
-            --progress-bar-color: transparent;
-            background: transparent !important;
-        }
-        
-        /* OVERLAY INVISIBLE PARA ACTIVAR AR */
-        #ar-activator {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: transparent;
-            z-index: 9999;
-            cursor: pointer;
-        }
-        
-        /* FALLBACK CASI INVISIBLE */
-        .fallback {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.95);
-            color: white;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            font-family: Arial, sans-serif;
-            z-index: 10000;
-            padding: 20px;
-        }
-        
-        .fallback-content {
-            background: rgba(0,0,0,0.8);
-            padding: 20px;
-            border-radius: 15px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .fallback-btn {
-            background: #4285f4;
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 8px;
-            margin-top: 15px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        
-        /* LOADING TRANSPARENTE */
-        .loader {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: rgba(255,255,255,0.7);
-            font-size: 14px;
-            opacity: 0;
-            transition: opacity 0.3s;
-            pointer-events: none;
-        }
+        body { margin: 0; padding: 0; overflow: hidden; }
+        #start { position: fixed; top:0; left:0; width:100%; height:100%; background:#000; color:white; display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:1000; }
+        #start button { background:#4285f4; color:white; border:none; padding:20px 40px; font-size:20px; border-radius:10px; margin-top:20px; cursor:pointer; }
+        #arScene { display:none; width:100vw; height:100vh; }
     </style>
 </head>
 <body>
-    <!-- LOADER INVISIBLE -->
-    <div class="loader" id="loader">Cargando modelo...</div>
+    <!-- BOTÓN DE INICIO -->
+    <div id="start">
+        <h1>Planta Napolitana AR</h1>
+        <p>Enfoca el código QR con la cámara</p>
+        <button onclick="startAR()">👁️ ACTIVAR CÁMARA</button>
+    </div>
     
-    <!-- MODELO 3D TRANSPARENTE -->
-    <model-viewer
-        id="ar-viewer"
-        src="planta_napolitana.glb"
-        ar
-        ar-modes="webxr"
-        camera-controls
-        interaction-prompt="none"
-        ar-scale="fixed"
-        ar-placement="floor"
-        field-of-view="65deg"
-        style="width:100%;height:100%">
-    </model-viewer>
-    
-    <!-- OVERLAY PARA ACTIVAR AR (INVISIBLE) -->
-    <div id="ar-activator" onclick="forceAR()"></div>
-    
-    <!-- FALLBACK (SOLO SI FALLA TODO) -->
-    <div class="fallback" id="fallback">
-        <div class="fallback-content">
-            <h3>AR no se activó automáticamente</h3>
-            <p>Toca la pantalla para activar Realidad Aumentada</p>
-            <button class="fallback-btn" onclick="activateARManual()">ACTIVAR AR AHORA</button>
-            <p style="margin-top:15px;font-size:12px;opacity:0.7;">Si no funciona, usa Chrome en Android o Safari en iPhone</p>
-        </div>
+    <!-- ESCENA AR -->
+    <div id="arScene">
+        <a-scene
+            vr-mode-ui="enabled: false"
+            embedded
+            arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false;">
+            
+            <!-- Esto buscará CUALQUIER QR -->
+            <a-nft
+                type="nft"
+                url="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro"
+                smooth="true"
+                smoothCount="10"
+                smoothTolerance=".01"
+                smoothThreshold="5">
+                
+                <a-entity
+                    gltf-model="https://criptonaldy.github.io/menu_aumentado/planta_napolitana.glb"
+                    scale="0.05 0.05 0.05"
+                    position="0 0 0"
+                    rotation="0 180 0">
+                </a-entity>
+            </a-nft>
+            
+            <a-entity camera></a-entity>
+        </a-scene>
     </div>
 
     <script>
-        const viewer = document.getElementById('ar-viewer');
-        const activator = document.getElementById('ar-activator');
-        const fallback = document.getElementById('fallback');
-        const loader = document.getElementById('loader');
-        
-        let arAttempted = false;
-        let modelLoaded = false;
-        
-        // MOSTRAR LOADER
-        loader.style.opacity = '1';
-        
-        // CUANDO CARGA EL MODELO
-        viewer.addEventListener('load', () => {
-            console.log('✅ Modelo cargado');
-            modelLoaded = true;
-            loader.style.opacity = '0';
-            
-            // INTENTAR AR AUTOMÁTICO INMEDIATAMENTE
-            setTimeout(attemptAutoAR, 500);
-        });
-        
-        // INTENTAR AR AUTOMÁTICO
-        function attemptAutoAR() {
-            if (arAttempted || !modelLoaded) return;
-            
-            arAttempted = true;
-            console.log('🚀 Intentando AR automático...');
-            
-            // DETECTAR DISPOSITIVO
-            const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
-            const isAndroid = /Android/.test(navigator.userAgent);
-            const isChrome = /Chrome/.test(navigator.userAgent);
-            
-            // ESTRATEGIAS POR DISPOSITIVO
-            if (isIOS) {
-                // iOS - Safari tiene AR Quick Look
-                attemptIOSAR();
-            } 
-            else if (isAndroid && isChrome) {
-                // Android Chrome - WebXR
-                attemptAndroidAR();
-            }
-            else {
-                // Otro - mostrar fallback después de timeout
-                setTimeout(showFallback, 3000);
-            }
+        function startAR() {
+            document.getElementById('start').style.display = 'none';
+            document.getElementById('arScene').style.display = 'block';
         }
-        
-        // ESTRATEGIA PARA iOS
-        function attemptIOSAR() {
-            // iOS puede redirigir a AR Quick Look
-            const modelUrl = 'https://criptonaldy.github.io/menu_aumentado/planta_napolitana.glb';
-            
-            // Intentar con un iframe invisible
-            const iframe = document.createElement('iframe');
-            iframe.style.display = 'none';
-            iframe.src = modelUrl;
-            document.body.appendChild(iframe);
-            
-            // iOS Safari a veces activa AR automáticamente con .usdz
-            // Como tenemos .glb, mostramos fallback después de tiempo
-            setTimeout(showFallback, 2000);
-        }
-        
-        // ESTRATEGIA PARA ANDROID
-        function attemptAndroidAR() {
-            // Android Chrome - intentar activar WebXR directamente
-            try {
-                // Método 1: Simular clic en AR
-                if (viewer.activateAR) {
-                    viewer.activateAR();
-                    console.log('🔄 Activando AR...');
-                    
-                    // Verificar si se activó
-                    setTimeout(() => {
-                        viewer.addEventListener('enter-ar', () => {
-                            console.log('🎉 AR activado automáticamente');
-                            activator.style.display = 'none';
-                        });
-                        
-                        // Si después de 2 segundos no se activó, mostrar fallback
-                        setTimeout(() => {
-                            if (!document.querySelector('model-viewer').getAttribute('ar')) {
-                                showFallback();
-                            }
-                        }, 2000);
-                    }, 100);
-                }
-            } catch (e) {
-                console.error('Error activando AR:', e);
-                showFallback();
-            }
-        }
-        
-        // MOSTRAR FALLBACK
-        function showFallback() {
-            console.log('📱 Mostrando fallback');
-            fallback.style.display = 'flex';
-            activator.style.display = 'none';
-        }
-        
-        // FORZAR AR (TOQUE EN PANTALLA)
-        function forceAR() {
-            console.log('👆 Usuario tocó para activar AR');
-            activateARManual();
-        }
-        
-        // ACTIVAR AR MANUALMENTE
-        function activateARManual() {
-            try {
-                if (viewer.activateAR) {
-                    viewer.activateAR();
-                    fallback.style.display = 'none';
-                    activator.style.display = 'none';
-                }
-            } catch (e) {
-                console.error('Error manual AR:', e);
-                fallback.innerHTML = `
-                    <div class="fallback-content">
-                        <h3>⚠️ AR no disponible</h3>
-                        <p>Tu dispositivo/browser no soporta AR automático.</p>
-                        <p>Prueba con:</p>
-                        <p>📱 iPhone: Safari + iOS 12+</p>
-                        <p>🤖 Android: Chrome actualizado</p>
-                        <button class="fallback-btn" onclick="location.reload()">REINTENTAR</button>
-                    </div>
-                `;
-            }
-        }
-        
-        // DETECTAR SI YA ESTÁ EN AR
-        viewer.addEventListener('enter-ar', () => {
-            console.log('✅ AR activado - interfaz oculta');
-            activator.style.display = 'none';
-            fallback.style.display = 'none';
-            document.body.style.background = 'transparent';
-        });
-        
-        // SI SALE DE AR
-        viewer.addEventListener('exit-ar', () => {
-            console.log('👋 Saliendo de AR');
-            // Opcional: recargar para reiniciar
-            // location.reload();
-        });
-        
-        // TIMEOUT GENERAL
-        setTimeout(() => {
-            if (!arAttempted) {
-                attemptAutoAR();
-            }
-        }, 3000);
-        
-        // ESCONDER OVERLAY DESPUÉS DE TIEMPO
-        setTimeout(() => {
-            activator.style.opacity = '0.5';
-        }, 1500);
-        
-        // SI EL USUARIO NO HACE NADA, INTENTAR AR DE NUEVO
-        setTimeout(() => {
-            if (fallback.style.display !== 'flex') {
-                attemptAutoAR();
-            }
-        }, 5000);
     </script>
 </body>
 </html>
