@@ -1,0 +1,11 @@
+{
+  "ar": "auto",
+  "fallback": "https://criptonaldy.github.io/menu_aumentado/",
+  "title": "Planta Napolitana",
+  "ios": {
+    "url": "https://criptonaldy.github.io/menu_aumentado/planta_napolitana.glb"
+  },
+  "android": {
+    "intent": "intent://arvr.google.com/scene-viewer/1.0?file=https://criptonaldy.github.io/menu_aumentado/planta_napolitana.glb&mode=ar_only#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=https://criptonaldy.github.io/menu_aumentado/;end;"
+  }
+}
