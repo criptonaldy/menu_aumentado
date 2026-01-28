@@ -2,351 +2,294 @@
 <html>
 <head>
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
     <style>
-        /* RESET COMPLETO - PANTALLA LLENA */
-        * {
+        /* COMPLETAMENTE INVISIBLE - SOLO CAMARA */
+        html, body {
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-        
-        html, body {
             width: 100vw;
             height: 100vh;
             overflow: hidden;
-            background: #111111;
+            background: transparent !important;
             position: fixed;
             top: 0;
             left: 0;
             touch-action: none;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
         }
         
-        /* MODELO 3D - OCUPA TODO */
+        /* MODELO TRANSPARENTE */
         model-viewer {
             width: 100%;
             height: 100%;
             --poster-color: transparent;
             --progress-bar-color: transparent;
-            --progress-bar-height: 0px;
+            background: transparent !important;
         }
         
-        /* BOTÓN AR MUY DISCRETO */
-        .ar-btn {
+        /* OVERLAY INVISIBLE PARA ACTIVAR AR */
+        #ar-activator {
             position: absolute;
-            bottom: 25px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
-            color: white;
-            border: none;
-            padding: 14px 35px;
-            border-radius: 50px;
-            font-size: 16px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            z-index: 1000;
-            opacity: 0.95;
-            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            z-index: 9999;
             cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            min-width: 200px;
-            justify-content: center;
         }
         
-        .ar-btn:hover, .ar-btn:active {
-            opacity: 1;
-            transform: translateX(-50%) scale(1.05);
-            box-shadow: 0 12px 30px rgba(255, 107, 107, 0.6);
-        }
-        
-        /* ANIMACIÓN DE PULSO */
-        @keyframes pulse-glow {
-            0% { box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4); }
-            50% { box-shadow: 0 8px 30px rgba(255, 107, 107, 0.7); }
-            100% { box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4); }
-        }
-        
-        .ar-btn.pulse {
-            animation: pulse-glow 2s infinite;
-        }
-        
-        /* LOADING INVISIBLE */
-        .loading {
+        /* FALLBACK CASI INVISIBLE */
+        .fallback {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
             color: white;
-            font-size: 14px;
-            opacity: 0;
-            pointer-events: none;
-        }
-        
-        /* MENSAJE TEMPORAL */
-        .hint {
-            position: absolute;
-            top: 25px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.85);
-            color: white;
-            padding: 12px 20px;
-            border-radius: 12px;
-            font-size: 14px;
-            z-index: 999;
-            opacity: 0;
-            animation: fadeInOut 4s ease;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            text-align: center;
-            max-width: 85%;
-            line-height: 1.4;
-        }
-        
-        @keyframes fadeInOut {
-            0% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
-            15% { opacity: 1; transform: translateX(-50%) translateY(0); }
-            85% { opacity: 1; transform: translateX(-50%) translateY(0); }
-            100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
-        }
-        
-        /* COMPATIBILIDAD */
-        .compat-alert {
             display: none;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.9);
-            color: white;
-            padding: 25px;
-            border-radius: 15px;
+            justify-content: center;
+            align-items: center;
             text-align: center;
-            max-width: 300px;
-            border: 2px solid #FF6B6B;
-            z-index: 1001;
-            backdrop-filter: blur(15px);
+            font-family: Arial, sans-serif;
+            z-index: 10000;
+            padding: 20px;
         }
         
-        .compat-alert.visible {
-            display: block;
+        .fallback-content {
+            background: rgba(0,0,0,0.8);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
         }
         
-        .compat-btn {
-            background: #FF6B6B;
+        .fallback-btn {
+            background: #4285f4;
             color: white;
             border: none;
             padding: 12px 25px;
             border-radius: 8px;
             margin-top: 15px;
             cursor: pointer;
-            font-weight: bold;
-            width: 100%;
+            font-size: 16px;
         }
         
-        /* VERSIÓN MÓVIL */
-        @media (max-width: 768px) {
-            .ar-btn {
-                bottom: 30px;
-                padding: 16px 40px;
-                font-size: 17px;
-                min-width: 220px;
-            }
-            
-            .hint {
-                top: 20px;
-                font-size: 13px;
-                padding: 10px 18px;
-            }
-        }
-        
-        /* iOS ESPECÍFICO */
-        .ios-ar-hint {
-            display: none;
+        /* LOADING TRANSPARENTE */
+        .loader {
             position: absolute;
-            bottom: 90px;
+            top: 50%;
             left: 50%;
-            transform: translateX(-50%);
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 13px;
-            text-align: center;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 8px 15px;
-            border-radius: 10px;
-            z-index: 999;
+            transform: translate(-50%, -50%);
+            color: rgba(255,255,255,0.7);
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
         }
     </style>
 </head>
 <body>
-    <!-- MENSAJE TEMPORAL -->
-    <div class="hint" id="hint">🌱 Escanea una superficie plana con el botón de abajo</div>
+    <!-- LOADER INVISIBLE -->
+    <div class="loader" id="loader">Cargando modelo...</div>
     
-    <!-- PARA iOS -->
-    <div class="ios-ar-hint" id="iosHint">En iPhone: toca "Compartir" → "Ver en AR"</div>
-    
-    <!-- ALERTA DE COMPATIBILIDAD -->
-    <div class="compat-alert" id="compatAlert">
-        <h3>📱 AR Recomendado</h3>
-        <p>Para mejor experiencia:</p>
-        <p><strong>Android:</strong> Usa Google Chrome</p>
-        <p><strong>iPhone:</strong> Usa Safari</p>
-        <button class="compat-btn" onclick="hideAlert()">ENTENDIDO</button>
-    </div>
-    
-    <!-- MODELO 3D -->
+    <!-- MODELO 3D TRANSPARENTE -->
     <model-viewer
-        id="arViewer"
+        id="ar-viewer"
         src="planta_napolitana.glb"
         ar
-        ar-modes="webxr" <!-- CLAVE: SOLO WebXR, NO pide apps -->
+        ar-modes="webxr"
         camera-controls
-        auto-rotate
-        auto-rotate-delay="0"
-        environment-image="neutral"
-        shadow-intensity="1.3"
-        exposure="1.1"
         interaction-prompt="none"
         ar-scale="fixed"
         ar-placement="floor"
         field-of-view="65deg"
-        camera-orbit="0deg 75deg 2.5m"
-        style="width: 100%; height: 100%;">
-        
-        <!-- BOTÓN AR -->
-        <button class="ar-btn pulse" id="arButton" slot="ar-button">
-            <span style="font-size: 20px;">👁️</span>
-            <span>VER EN TU ESPACIO</span>
-        </button>
-        
+        style="width:100%;height:100%">
     </model-viewer>
     
-    <!-- LOADING -->
-    <div class="loading" id="loading">Cargando modelo 3D...</div>
+    <!-- OVERLAY PARA ACTIVAR AR (INVISIBLE) -->
+    <div id="ar-activator" onclick="forceAR()"></div>
+    
+    <!-- FALLBACK (SOLO SI FALLA TODO) -->
+    <div class="fallback" id="fallback">
+        <div class="fallback-content">
+            <h3>AR no se activó automáticamente</h3>
+            <p>Toca la pantalla para activar Realidad Aumentada</p>
+            <button class="fallback-btn" onclick="activateARManual()">ACTIVAR AR AHORA</button>
+            <p style="margin-top:15px;font-size:12px;opacity:0.7;">Si no funciona, usa Chrome en Android o Safari en iPhone</p>
+        </div>
+    </div>
 
     <script>
-        // ELEMENTOS
-        const viewer = document.getElementById('arViewer');
-        const arButton = document.getElementById('arButton');
-        const hint = document.getElementById('hint');
-        const iosHint = document.getElementById('iosHint');
-        const compatAlert = document.getElementById('compatAlert');
-        const loading = document.getElementById('loading');
+        const viewer = document.getElementById('ar-viewer');
+        const activator = document.getElementById('ar-activator');
+        const fallback = document.getElementById('fallback');
+        const loader = document.getElementById('loader');
         
-        // DETECTAR DISPOSITIVO
-        const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
-        const isAndroid = /Android/.test(navigator.userAgent);
-        const isChrome = /Chrome/.test(navigator.userAgent) && !/Edge|Edg/.test(navigator.userAgent);
-        const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+        let arAttempted = false;
+        let modelLoaded = false;
         
-        // CONFIGURAR SEGÚN DISPOSITIVO
-        function configureForDevice() {
-            if (isIOS && isSafari) {
-                // iPhone con Safari - iOS AR funciona bien
-                console.log('📱 iPhone Safari detectado');
-                setTimeout(() => {
-                    iosHint.style.display = 'block';
-                    setTimeout(() => {
-                        iosHint.style.display = 'none';
-                    }, 5000);
-                }, 2000);
-            }
-            else if (isAndroid && !isChrome) {
-                // Android sin Chrome - mostrar alerta
-                setTimeout(() => {
-                    compatAlert.classList.add('visible');
-                }, 3000);
-            }
-        }
+        // MOSTRAR LOADER
+        loader.style.opacity = '1';
         
         // CUANDO CARGA EL MODELO
         viewer.addEventListener('load', () => {
-            console.log('✅ planta_napolitana.glb cargado');
+            console.log('✅ Modelo cargado');
+            modelLoaded = true;
+            loader.style.opacity = '0';
             
-            // Ocultar hint después de 4 segundos
-            setTimeout(() => {
-                hint.style.opacity = '0';
-                setTimeout(() => hint.style.display = 'none', 500);
-            }, 4000);
-            
-            // Configurar dispositivo
-            configureForDevice();
-            
-            // Verificar si WebXR está disponible
-            checkWebXRSupport();
+            // INTENTAR AR AUTOMÁTICO INMEDIATAMENTE
+            setTimeout(attemptAutoAR, 500);
         });
         
-        // VERIFICAR SOPORTE WEBXR
-        function checkWebXRSupport() {
-            if ('xr' in navigator) {
-                navigator.xr.isSessionSupported('immersive-ar').then((supported) => {
-                    if (!supported) {
-                        // WebXR no soportado - cambiar botón
-                        arButton.innerHTML = '<span>📱</span> <span>AR NO DISPONIBLE</span>';
-                        arButton.style.background = 'linear-gradient(135deg, #666 0%, #999 100%)';
-                        arButton.classList.remove('pulse');
-                        arButton.disabled = true;
-                    }
-                });
+        // INTENTAR AR AUTOMÁTICO
+        function attemptAutoAR() {
+            if (arAttempted || !modelLoaded) return;
+            
+            arAttempted = true;
+            console.log('🚀 Intentando AR automático...');
+            
+            // DETECTAR DISPOSITIVO
+            const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+            const isAndroid = /Android/.test(navigator.userAgent);
+            const isChrome = /Chrome/.test(navigator.userAgent);
+            
+            // ESTRATEGIAS POR DISPOSITIVO
+            if (isIOS) {
+                // iOS - Safari tiene AR Quick Look
+                attemptIOSAR();
+            } 
+            else if (isAndroid && isChrome) {
+                // Android Chrome - WebXR
+                attemptAndroidAR();
+            }
+            else {
+                // Otro - mostrar fallback después de timeout
+                setTimeout(showFallback, 3000);
             }
         }
         
-        // CUANDO ENTRA EN AR
-        viewer.addEventListener('enter-ar', () => {
-            console.log('🎉 AR activado');
+        // ESTRATEGIA PARA iOS
+        function attemptIOSAR() {
+            // iOS puede redirigir a AR Quick Look
+            const modelUrl = 'https://criptonaldy.github.io/menu_aumentado/planta_napolitana.glb';
             
-            // Ocultar botón
-            arButton.style.opacity = '0';
-            setTimeout(() => {
-                arButton.style.display = 'none';
-            }, 300);
+            // Intentar con un iframe invisible
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = modelUrl;
+            document.body.appendChild(iframe);
             
-            // Ocultar hint
-            hint.style.display = 'none';
-            iosHint.style.display = 'none';
-            compatAlert.classList.remove('visible');
-        });
-        
-        // CUANDO SALE DE AR
-        viewer.addEventListener('exit-ar', () => {
-            console.log('👋 Saliendo de AR');
-            
-            // Mostrar botón nuevamente
-            arButton.style.display = 'flex';
-            setTimeout(() => {
-                arButton.style.opacity = '0.95';
-            }, 100);
-        });
-        
-        // OCULTAR ALERTA
-        function hideAlert() {
-            compatAlert.classList.remove('visible');
+            // iOS Safari a veces activa AR automáticamente con .usdz
+            // Como tenemos .glb, mostramos fallback después de tiempo
+            setTimeout(showFallback, 2000);
         }
         
-        // AUTO-GIRO PARA ATRAER ATENCIÓN
-        setTimeout(() => {
-            viewer.autoRotate = true;
-            setTimeout(() => {
-                viewer.autoRotate = false;
-            }, 3000);
-        }, 1000);
+        // ESTRATEGIA PARA ANDROID
+        function attemptAndroidAR() {
+            // Android Chrome - intentar activar WebXR directamente
+            try {
+                // Método 1: Simular clic en AR
+                if (viewer.activateAR) {
+                    viewer.activateAR();
+                    console.log('🔄 Activando AR...');
+                    
+                    // Verificar si se activó
+                    setTimeout(() => {
+                        viewer.addEventListener('enter-ar', () => {
+                            console.log('🎉 AR activado automáticamente');
+                            activator.style.display = 'none';
+                        });
+                        
+                        // Si después de 2 segundos no se activó, mostrar fallback
+                        setTimeout(() => {
+                            if (!document.querySelector('model-viewer').getAttribute('ar')) {
+                                showFallback();
+                            }
+                        }, 2000);
+                    }, 100);
+                }
+            } catch (e) {
+                console.error('Error activando AR:', e);
+                showFallback();
+            }
+        }
         
-        // INICIAR
-        window.onload = () => {
-            loading.style.opacity = '1';
-            setTimeout(() => {
-                loading.style.opacity = '0';
-            }, 1500);
-        };
+        // MOSTRAR FALLBACK
+        function showFallback() {
+            console.log('📱 Mostrando fallback');
+            fallback.style.display = 'flex';
+            activator.style.display = 'none';
+        }
+        
+        // FORZAR AR (TOQUE EN PANTALLA)
+        function forceAR() {
+            console.log('👆 Usuario tocó para activar AR');
+            activateARManual();
+        }
+        
+        // ACTIVAR AR MANUALMENTE
+        function activateARManual() {
+            try {
+                if (viewer.activateAR) {
+                    viewer.activateAR();
+                    fallback.style.display = 'none';
+                    activator.style.display = 'none';
+                }
+            } catch (e) {
+                console.error('Error manual AR:', e);
+                fallback.innerHTML = `
+                    <div class="fallback-content">
+                        <h3>⚠️ AR no disponible</h3>
+                        <p>Tu dispositivo/browser no soporta AR automático.</p>
+                        <p>Prueba con:</p>
+                        <p>📱 iPhone: Safari + iOS 12+</p>
+                        <p>🤖 Android: Chrome actualizado</p>
+                        <button class="fallback-btn" onclick="location.reload()">REINTENTAR</button>
+                    </div>
+                `;
+            }
+        }
+        
+        // DETECTAR SI YA ESTÁ EN AR
+        viewer.addEventListener('enter-ar', () => {
+            console.log('✅ AR activado - interfaz oculta');
+            activator.style.display = 'none';
+            fallback.style.display = 'none';
+            document.body.style.background = 'transparent';
+        });
+        
+        // SI SALE DE AR
+        viewer.addEventListener('exit-ar', () => {
+            console.log('👋 Saliendo de AR');
+            // Opcional: recargar para reiniciar
+            // location.reload();
+        });
+        
+        // TIMEOUT GENERAL
+        setTimeout(() => {
+            if (!arAttempted) {
+                attemptAutoAR();
+            }
+        }, 3000);
+        
+        // ESCONDER OVERLAY DESPUÉS DE TIEMPO
+        setTimeout(() => {
+            activator.style.opacity = '0.5';
+        }, 1500);
+        
+        // SI EL USUARIO NO HACE NADA, INTENTAR AR DE NUEVO
+        setTimeout(() => {
+            if (fallback.style.display !== 'flex') {
+                attemptAutoAR();
+            }
+        }, 5000);
     </script>
 </body>
 </html>
